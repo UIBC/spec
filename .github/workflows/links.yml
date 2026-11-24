@@ -1,0 +1,23 @@
+name: links
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  relative-links:
+    # One runner: the question is "does every relative link resolve inside this
+    # repository", which does not depend on the platform or on anybody's server.
+    # External URLs are deliberately left alone - a check that goes red when
+    # someone else's site is down tells you nothing about the spec.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python tools/check_links.py
