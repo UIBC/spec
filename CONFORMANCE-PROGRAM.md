@@ -44,30 +44,41 @@ manifest identifies a **legal entity**, and the listing **expires**.
 |---|---|---|---|
 | published test corpus | yes | 6 fixtures + 12 adversarial packages, frozen by `FIXTURES.sha256` | exists |
 | runner a stranger can execute | yes | `tools/run_crossimpl.py`, `run_vectors.py`, `run_adversarial.py` | exists |
-| second implementation | yes | `second-impl/verify.mjs`, Node 22, 10 of 19 checks | exists, same maintainer |
-| implementation manifest | yes | `implementations.json` | exists |
+| second implementation | yes | `uibc-core/tools/verify-js` (18 of 19, CI-enforced, 36 packages) and `UIBC/vectors/second-impl` (10 of 19, public corpus) | exists, same maintainer twice |
+| implementation manifest | yes | `implementations.json`: 4 entries, 0 independent | exists |
 | gate that refuses overclaims | implicit | `tools/check_implementations.py` (R1–R5) | exists |
 | independent implementation | yes | none | **absent** |
-| submitted external run | yes | `EXTERNAL-RUNS.json`-style ledger, empty on purpose | **absent** |
+| submitted run record | yes | `uibc-core/benchmarks/submissions/` holds one machine-readable run (`uibc-iverify@158a82d`, 21 mutants, 2 accepted); all of them by this maintainer | exists, zero external |
 | legal entity / signed terms | yes | none | **absent** |
 | validity period and revocation | yes | not defined | **absent** |
 | reviewer other than the author | yes | none | **absent** |
 
-Four of the eight ingredients exist. The four that do not are all *social*
-(another maintainer, another organisation, a clock, a reviewer) — which is
-exactly why writing more code cannot close them.
+Five of the eight ingredients exist and one is half-built: the submission
+record exists but has never been filled in by anyone outside this organisation.
+The three that do not exist — another maintainer, a legal entity to sign terms,
+a reviewer who is not the author — are all *social*, which is exactly why
+writing more code cannot close them. A note on the order of work: two
+implementations and a 36-package cross-check existed in `uibc-core` for six
+days while the public repositories still described cross-implementation as
+missing. Publication lag, not capability, was the gap; that is also social.
 
 ## 3. The smallest submission, defined
 
-A submission is a pull request to `UIBC/vectors` adding one directory under
-`submissions/<entity>-<impl>/` containing:
+A submission reuses the schema that already exists rather than a new one:
+`uibc-core/benchmarks/submissions/uibc-<impl>@<commit>.json` (`uibc-bench/1`),
+which already carries implementation name, submitter, commit, machine, the
+verifier command, per-case outcomes with the raw exit codes, and a
+`claim.not_claimed` list the submitter has to write themselves. Two additions
+are proposed, both because the existing record cannot answer a question a reader
+will ask:
 
-1. `PRODUCT.yaml` — legal entity, implementation name and version, language,
-   repository URL, the checks it claims (`S1`…`S19`), and a contact address.
-2. `results.json` — one row per corpus case: case id, verdict, exit code,
-   timestamp, and the digest of the case tree it was produced against.
-3. `run.log` — the unedited stdout of the runner. A log that has been tidied is
-   refused; the noise is part of the evidence.
+1. `legal_entity` and `contact` — who is accountable for the run. Without it
+   a submission is an anonymous claim with a commit hash.
+2. `corpus_digest` — the `FIXTURES.sha256` digest the run was produced
+   against, so a listing can be tied to a corpus version instead of a date.
+
+The run log stays unedited and attached; a tidied log is refused, because the
+noise is part of the evidence.
 
 Three rules apply to all of it:
 
@@ -126,3 +137,4 @@ organisation profile, and it survives every future version of this programme:
 4. What a medical-device manufacturer would actually need to see before citing a
    UIBC listing in a 510(k) cybersecurity submission, if anything. That question
    belongs to `MEDICAL-MAPPING.md` and is currently unanswered by evidence.
+
