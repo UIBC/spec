@@ -19,7 +19,7 @@ python tools/run_vectors.py
 
 期望输出（原样六行，顺序固定）：
 
-以下为 2026-11-24 在 `main@1f80a03` 上、Windows 11 / Python 3.13 的全新 clone 实跑原样输出（`--pubkey` 行会打印你本机的绝对路径）：
+以下为 2026-11-24 在 `UIBC/vectors` 合并后 main（`2f1f39b`）、Windows 11 / Python 3.13 的全新 clone 实跑原样输出（`--pubkey` 行会打印你本机的绝对路径）：
 
 ```
 [OK] clean                        rc=0 result=PASS (expected rc=0 result=PASS)
