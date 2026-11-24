@@ -48,7 +48,7 @@ manifest identifies a **legal entity**, and the listing **expires**.
 | implementation manifest | yes | `implementations.json`: 4 entries, 0 independent | exists |
 | gate that refuses overclaims | implicit | `tools/check_implementations.py` (R1–R5) | exists |
 | independent implementation | yes | none | **absent** |
-| submitted run record | yes | `UIBC/vectors/submissions/` now holds one submission judged by `tools/check_submission.py` (ten rules, nine-way self-test, including competence basis, witness and scope); `uibc-core/benchmarks/submissions/` holds one verifier benchmark | exists, **both by this maintainer, zero external, competence basis `none`** |
+| submitted run record | yes | `UIBC/vectors/submissions/` now holds one submission judged by `tools/check_submission.py` (twelve rules, thirteen-way self-test plus one honestly signed witness that must pass, covering competence basis, witness statement and scope); `uibc-core/benchmarks/submissions/` holds one verifier benchmark | exists, **both by this maintainer, zero external, competence basis `none`, witness `null`** |
 | legal entity / signed terms | yes | none | **absent** |
 | validity period and revocation | yes | not defined | **absent** |
 | reviewer other than the author | yes | none | **absent** |
@@ -84,7 +84,16 @@ will ask:
 4. `witness` — `null` or an object naming who watched, with an
    `independent_of_submitter` flag. The key must be present even when the value
    is `null`, because "no witness" and "we did not think about it" are different
-   statements and only one of them is reviewable.
+   statements and only one of them is reviewable. A named witness must also ship
+   `witness/statement.json` and `witness/witness.key.pub`: an Ed25519-signed
+   statement over its own canonical bytes, naming the same person as the product
+   record, attesting to the **same** `corpus_digest` as the results it
+   accompanies, and signed by a key that neither this repository publishes nor
+   the submitter declares. Identity is checked before the signature, because the
+   attack this rule exists for is a submitter signing for their own witness.
+   What a signed statement proves is that it came from a key the submitter does
+   not hold. It does not prove the witness exists, watched anything, or is
+   accredited — a signature is an identity, not a credibility.
 5. `scope.not_covered` — the checks the submitter does not claim. Every check
    id in `S1`-`S19` must be either claimed or disclaimed, exactly once.
    Silence about a check reads as coverage.
@@ -98,9 +107,12 @@ record, a self-declared `independent` from this organisation's own entity, a
 corpus digest that is not the one committed here, a missing, re-scored,
 duplicated or invented case, a log under 200 bytes, a check id outside
 `S1`-`S19`, a missing or empty competence basis, a submission that does not
-mention its witness at all, and a check silently left out of both lists.
-`--selftest` breaks the format nine ways and requires all nine to be caught, so
-the validator cannot quietly become a formality.
+mention its witness at all, a check silently left out of both lists, a named
+witness with no signed statement behind it, a witness signature that does not
+verify, a statement signed by a key this repository publishes or by the
+submitter's own key. `--selftest` breaks the format thirteen ways and requires
+all thirteen to be caught — and requires one honestly signed witness to be
+accepted, so that the rule is a check and not a wall.
 
 Three of those rules refuse silence rather than a bad answer, and that is
 deliberate: writing `none` is accepted, writing nothing is not. An honest
