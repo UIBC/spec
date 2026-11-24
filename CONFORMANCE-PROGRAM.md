@@ -48,7 +48,7 @@ manifest identifies a **legal entity**, and the listing **expires**.
 | implementation manifest | yes | `implementations.json`: 4 entries, 0 independent | exists |
 | gate that refuses overclaims | implicit | `tools/check_implementations.py` (R1–R5) | exists |
 | independent implementation | yes | none | **absent** |
-| submitted run record | yes | `UIBC/vectors/submissions/` now holds one submission judged by `tools/check_submission.py` (seven rules, six-way self-test); `uibc-core/benchmarks/submissions/` holds one verifier benchmark | exists, **both by this maintainer, zero external** |
+| submitted run record | yes | `UIBC/vectors/submissions/` now holds one submission judged by `tools/check_submission.py` (ten rules, nine-way self-test, including competence basis, witness and scope); `uibc-core/benchmarks/submissions/` holds one verifier benchmark | exists, **both by this maintainer, zero external, competence basis `none`** |
 | legal entity / signed terms | yes | none | **absent** |
 | validity period and revocation | yes | not defined | **absent** |
 | reviewer other than the author | yes | none | **absent** |
@@ -76,6 +76,18 @@ will ask:
    a submission is an anonymous claim with a commit hash.
 2. `corpus_digest` — the `FIXTURES.sha256` digest the run was produced
    against, so a listing can be tied to a corpus version instead of a date.
+3. `competence_basis` — who ran it and on what standing: a laboratory with an
+   accreditation number, a named person with a qualification, or the literal
+   `none`. A reviewer of a verification record asks this before asking whether
+   anything passed; a record that omits it reads as adequate when it is merely
+   silent.
+4. `witness` — `null` or an object naming who watched, with an
+   `independent_of_submitter` flag. The key must be present even when the value
+   is `null`, because "no witness" and "we did not think about it" are different
+   statements and only one of them is reviewable.
+5. `scope.not_covered` — the checks the submitter does not claim. Every check
+   id in `S1`-`S19` must be either claimed or disclaimed, exactly once.
+   Silence about a check reads as coverage.
 
 The run log stays unedited and attached; a tidied log is refused, because the
 noise is part of the evidence.
@@ -84,9 +96,18 @@ This is no longer a description of what a submission should look like. It is
 enforced: `UIBC/vectors/tools/check_submission.py` refuses a missing product
 record, a self-declared `independent` from this organisation's own entity, a
 corpus digest that is not the one committed here, a missing, re-scored,
-duplicated or invented case, a log under 200 bytes, and a check id outside
-`S1`-`S19`. `--selftest` breaks the format six ways and requires all six to
-be caught, so the validator cannot quietly become a formality.
+duplicated or invented case, a log under 200 bytes, a check id outside
+`S1`-`S19`, a missing or empty competence basis, a submission that does not
+mention its witness at all, and a check silently left out of both lists.
+`--selftest` breaks the format nine ways and requires all nine to be caught, so
+the validator cannot quietly become a formality.
+
+Three of those rules refuse silence rather than a bad answer, and that is
+deliberate: writing `none` is accepted, writing nothing is not. An honest
+absence can be checked by a reader who asks why; an omission cannot be checked
+at all. Our own first row therefore states `competence_basis: none` and
+`witness: null` in the record itself rather than leaving a reader to infer it
+from the prose.
 
 The first row in that table is a submission by this corpus's own author,
 labelled `same-maintainer`. External submissions remain zero.
