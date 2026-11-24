@@ -48,7 +48,7 @@ manifest identifies a **legal entity**, and the listing **expires**.
 | implementation manifest | yes | `implementations.json`: 4 entries, 0 independent | exists |
 | gate that refuses overclaims | implicit | `tools/check_implementations.py` (R1–R5) | exists |
 | independent implementation | yes | none | **absent** |
-| submitted run record | yes | `UIBC/vectors/submissions/` now holds one submission judged by `tools/check_submission.py` (twelve rules, thirteen-way self-test plus one honestly signed witness that must pass, covering competence basis, witness statement and scope); `uibc-core/benchmarks/submissions/` holds one verifier benchmark | exists, **both by this maintainer, zero external, competence basis `none`, witness `null`** |
+| submitted run record | yes | `UIBC/vectors/submissions/` now holds one submission judged by `tools/check_submission.py` (fourteen rules, fifteen-way self-test plus one honestly signed witness that must pass, covering competence basis, witness statement, scope and coverage); `uibc-core/benchmarks/submissions/` holds one verifier benchmark | exists, **both by this maintainer, zero external, competence basis `none`, witness `null`, claims 10 of 19 checks** |
 | legal entity / signed terms | yes | none | **absent** |
 | validity period and revocation | yes | not defined | **absent** |
 | reviewer other than the author | yes | none | **absent** |
@@ -120,9 +120,10 @@ duplicated or invented case, a log under 200 bytes, a check id outside
 mention its witness at all, a check silently left out of both lists, a named
 witness with no signed statement behind it, a witness signature that does not
 verify, a statement signed by a key this repository publishes or by the
-submitter's own key. `--selftest` breaks the format thirteen ways and requires
-all thirteen to be caught — and requires one honestly signed witness to be
-accepted, so that the rule is a check and not a wall.
+submitter's own key, and a claim about a check that no row of the run observed.
+`--selftest` breaks the format fifteen ways and requires all fifteen to be
+caught — and requires one honestly signed witness to be accepted, so that the
+rule is a check and not a wall.
 
 Three of those rules refuse silence rather than a bad answer, and that is
 deliberate: writing `none` is accepted, writing nothing is not. An honest
@@ -130,6 +131,25 @@ absence can be checked by a reader who asks why; an omission cannot be checked
 at all. Our own first row therefore states `competence_basis: none` and
 `witness: null` in the record itself rather than leaving a reader to infer it
 from the prose.
+
+## 3a. What the corpus does not test, published
+
+Nineteen checks are named and eight frozen cases exist; those were never the
+same number, and nothing said so. `UIBC/vectors/COVERAGE.md` is generated from
+the verifier's own JSON and states it: **10 of 19 checks are emitted on at least
+one case, 4 of 19 have ever answered anything other than PASS, and 9 are reached
+by no case at all.** Each row of a submission now records `checks_emitted`, and
+a submission may only claim ids that appear somewhere in that union — so a
+record that claims nineteen is refused, because it would be asserting behaviour
+nobody watched.
+
+The distinction the map keeps is between *exists* and *was observed to decide*.
+A check that has only ever said PASS is not thereby broken; it is untested, and
+a specification that reports nineteen checks without saying which eight are
+unexercised is inviting the reader to conflate the two. `coverage_map.py --check`
+rebuilds the file from the corpus and fails on a byte difference, so the number
+cannot drift.
+
 
 The first row in that table is a submission by this corpus's own author,
 labelled `same-maintainer`. External submissions remain zero.
