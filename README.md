@@ -9,6 +9,7 @@ The specification of **UIBC** — a portable package that binds an agent's ident
 - [`spec/draft-zhao-uibc-evidence-chain-00.md`](spec/draft-zhao-uibc-evidence-chain-00.md) (2026-11-18, 11.5 KB)
 - [`QUICKSTART.md`](QUICKSTART.md) — three commands, two minutes, expected output included
 - [`RELATED-WORK.md`](RELATED-WORK.md) — how this draft sits next to SCITT, C2PA, the signed-receipt drafts, sigstore, MCP Registry and AIUC-1
+- [`MEDICAL-MAPPING.md`](MEDICAL-MAPPING.md) — proposal: which parts of a premarket cybersecurity submission a byte-level check can cover, and which it cannot (not a regulatory opinion)
 
 ## What this draft does and does not do
 
