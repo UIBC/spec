@@ -7,6 +7,8 @@ The specification of **UIBC** — a portable package that binds an agent's ident
 ## Read the draft
 
 - [`spec/draft-zhao-uibc-evidence-chain-00.md`](spec/draft-zhao-uibc-evidence-chain-00.md) (2026-11-18, 11.5 KB)
+- [`QUICKSTART.md`](QUICKSTART.md) — three commands, two minutes, expected output included
+- [`RELATED-WORK.md`](RELATED-WORK.md) — how this draft sits next to SCITT, C2PA, the signed-receipt drafts, sigstore, MCP Registry and AIUC-1
 
 ## What this draft does and does not do
 
