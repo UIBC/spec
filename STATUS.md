@@ -33,7 +33,7 @@ Every row is either a fact someone can re-check, or a gap we have not closed. No
 | Published normative spec | **none** (draft-00 only) | Readers have nothing to conform *to* |
 | Check count consistency | abstract says 18, verifier runs S1–S19 | A reader counting will find the mismatch |
 | Root algorithm | provisional | Cannot be ratified while flagged provisional |
-| Transparent log / witness | none | Timestamps prove time, not that a log accepted the bytes |
+| Transparent log witness | anchor tooling exists (`anchor_rekor.py`, `anchor_ots.py`, `anchor_tsa.py`, `nostr_anchor.py`); two Bitcoin block attestations published (heights 976684 and 976735); **no transparency-log inclusion entry a reader can open** | Time is proven to a block; equivocation by a log is not what a block proves, and one is not claimed |
 | **D-002: index metadata partly mutable** | `evidence_id`, `media_type`, `created_at` rewritable while verdict stays PASS | Evidence can be backdated or re-identified without detection. Found 2026-11-24 by our own adversarial set; reproduce with `run_adversarial.py`, gate with `--strict` |
 | Medical mapping | proposal only | `MEDICAL-MAPPING.md` is unverified against a real submission; no regulatory endorsement |
 
@@ -48,3 +48,12 @@ The core repository carries implementation, tests and history. This one carries 
 - 2026-11-24: the matrix it points at is now eight rows (`unsigned`, `unknown-upgrade`); twelve-case adversarial supplement added; fixture digests frozen; D-002 found and recorded; `MEDICAL-MAPPING.md` added as a proposal.
 
 
+
+
+## 关于这张表的有效期
+
+这张表历史上的若干行是凭快照写的，2026-11-24 一天内查出三行已过期：第二实现（`verify-js` 18/19 项、CI 强制）被写成缺失；验证器基准记录被写成没有；比特币区块时间证明（高度 976735 / 976684）被写成 Pending。
+
+修复方向不是再改一遍句子，而是让句子有摘要：`UIBC/.github` 的 `registry/evidence-index.json` 把这类说法变成可抓取、可比对的行，`check_evidence_index.py` 每天重抓一次；"absent"的行必须带一个可能反驳它的账本。
+
+在那张索引覆盖每一行之前，**本表应被读作一份有有效期的摘要，而不是证据本身**。
