@@ -101,6 +101,16 @@ will ask:
 The run log stays unedited and attached; a tidied log is refused, because the
 noise is part of the evidence.
 
+The record is **generated, then judged**, not typed. `tools/make_submission.py`
+runs the matrix gate itself, copies its stdout into `run.log` verbatim, derives
+`results.json` from the verdict lines, and refuses to write anything when that
+gate fails. `--reproduce` rebuilds a committed submission from the corpus as it
+is now and compares bytes, so a hand-edited verdict, a stale log, or a corpus
+that moved under a committed row is `SUBMISSION STALE` in CI. The first row in
+this repository was hand-written once; it is now byte-identical to what the
+generator produces, which is what makes "derived" a fact rather than an
+intention.
+
 This is no longer a description of what a submission should look like. It is
 enforced: `UIBC/vectors/tools/check_submission.py` refuses a missing product
 record, a self-declared `independent` from this organisation's own entity, a
