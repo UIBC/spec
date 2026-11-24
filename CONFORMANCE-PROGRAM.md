@@ -48,7 +48,7 @@ manifest identifies a **legal entity**, and the listing **expires**.
 | implementation manifest | yes | `implementations.json`: 4 entries, 0 independent | exists |
 | gate that refuses overclaims | implicit | `tools/check_implementations.py` (R1–R5) | exists |
 | independent implementation | yes | none | **absent** |
-| submitted run record | yes | `uibc-core/benchmarks/submissions/` holds one machine-readable run (`uibc-iverify@158a82d`, 21 mutants, 2 accepted); all of them by this maintainer | exists, zero external |
+| submitted run record | yes | `UIBC/vectors/submissions/` now holds one submission judged by `tools/check_submission.py` (seven rules, six-way self-test); `uibc-core/benchmarks/submissions/` holds one verifier benchmark | exists, **both by this maintainer, zero external** |
 | legal entity / signed terms | yes | none | **absent** |
 | validity period and revocation | yes | not defined | **absent** |
 | reviewer other than the author | yes | none | **absent** |
@@ -79,6 +79,17 @@ will ask:
 
 The run log stays unedited and attached; a tidied log is refused, because the
 noise is part of the evidence.
+
+This is no longer a description of what a submission should look like. It is
+enforced: `UIBC/vectors/tools/check_submission.py` refuses a missing product
+record, a self-declared `independent` from this organisation's own entity, a
+corpus digest that is not the one committed here, a missing, re-scored,
+duplicated or invented case, a log under 200 bytes, and a check id outside
+`S1`-`S19`. `--selftest` breaks the format six ways and requires all six to
+be caught, so the validator cannot quietly become a formality.
+
+The first row in that table is a submission by this corpus's own author,
+labelled `same-maintainer`. External submissions remain zero.
 
 Three rules apply to all of it:
 
@@ -137,4 +148,5 @@ organisation profile, and it survives every future version of this programme:
 4. What a medical-device manufacturer would actually need to see before citing a
    UIBC listing in a 510(k) cybersecurity submission, if anything. That question
    belongs to `MEDICAL-MAPPING.md` and is currently unanswered by evidence.
+
 
