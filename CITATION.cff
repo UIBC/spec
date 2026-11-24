@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: "Draft 00, non-normative. Cite it as a draft, not as a standard."
+title: "UIBC: Unified Integrity Boundary Check — specification, draft 00"
+abstract: >-
+  A portable package binds an agent's identity, lifecycle events and action
+  evidence into one hash-committed structure, and a verification procedure
+  returns one of three outcomes - PASS, FAIL, or the explicit UNKNOWN - from
+  bytes alone. The draft names what cannot be checked from those bytes, and it
+  states the boundary of unpinned verification: a package re-sealed by another
+  key verifies against itself, so authorship requires pinning.
+type: report
+authors:
+  - family-names: Zhao
+    given-names: Xinghua
+    alias: zhaoxinghua09-cell
+    affiliation: "individual capacity; no organisation represented"
+version: "draft 00 (non-normative)"
+date-released: 2026-11-18
+license: Apache-2.0
+repository-code: https://github.com/UIBC/spec
+url: https://github.com/UIBC/spec
+keywords:
+  - integrity
+  - evidence
+  - agent
+  - verification
+  - provenance
+  - protocol
+notes: >-
+  Written in Internet-Draft shape so reviewers can read it the way they read a
+  draft. It has not been submitted to any standards body, carries no IETF
+  copyright notice, and must not be cited as an Internet-Draft.
+references:
+  - type: software
+    title: "UIBC conformance vectors: four packages and a six-row expectation gate"
+    repository-code: https://github.com/UIBC/vectors
+    version: "main as of 2026-11-24"
+  - type: software
+    title: "uibc-core: reference verifier"
+    version: "0.5.0"
+    url: https://pypi.org/project/uibc-core/0.5.0/
