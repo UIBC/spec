@@ -24,7 +24,7 @@ An autonomous agent leaves a trail of actions, but that trail is normally
 produced, stored and verified by the same party it is supposed to convince.
 This document specifies a portable package that binds an agent's identity,
 lifecycle, and action evidence into one hash-committed structure, gives an
-eighteen-check verification procedure with three-valued outcomes, and
+nineteen-check verification procedure with three-valued outcomes, and
 specifies how to commit the resulting root to backends the operator cannot
 rewrite. The specification is deliberately narrow: it defines what can be
 checked from bytes alone, and it names what it does **not** check.
@@ -113,6 +113,7 @@ single `FAIL` makes the verdict `FAIL`; otherwise any `INCONCLUSIVE` makes it
 | S7 | evidence index metadata | index metadata digest agreement |
 | S8 | package checkpoint head | recomputed checkpoint equals stored |
 | S9 | head pinned out-of-band | only when the verifier was given an external head |
+| S19 | freshness state | only when the verifier was given a state record; answers replay, not rollback (Section 7.5) |
 | S10 | attestation closure declared | declarations are recorded, **not** verified |
 | S5 | evidence root | recomputed root equals `manifest.evidence_root` |
 | S6 | seal signature | Ed25519 verified publicly; HMAC only with the owner key |
@@ -138,6 +139,69 @@ outcome set is: `REVOKED`, `DISPUTED`, `MISMATCH`, `MALFORMED`,
 `UNVERIFIABLE`. A revocation or dispute MUST name the `target_root` it
 applies to and MUST be rejected if that root differs from the package's
 current root — otherwise a stale revocation silently applies to new content.
+
+### 7.5 Freshness, and what S19 does not do
+
+A verifier checks `freshness state` (S19) when the caller supplies a state
+record, and reports one of three outcomes. This section states what the check
+answers, because the answer is narrower than "did this package roll back":
+
+- **no record for the subject** — the freshness check reports `INCONCLUSIVE`.
+  The absence of a comparison MUST NOT be reported as `PASS`.
+- **record present, `checkpoint_head` equal to the recorded head** — `PASS`.
+  The verifier has accepted these exact bytes for this subject before.
+- **record present, `checkpoint_head` differs from the recorded head** — the
+  check reports `INCONCLUSIVE`, and the report MUST say that the head cannot be
+  placed before or after the recorded one. A `checkpoint_head` is a hash, and
+  hashes carry no order.
+
+Therefore, in this version of the format:
+
+- S19 answers "has this exact head been accepted before by this verifier?". It
+  is a **replay marker**, and a report MUST NOT describe it as rollback
+  protection.
+- **Rollback is detected by an out-of-band head**, not by S19: see S9
+  (`--expect-head`), and Section 5's rule that a check whose comparison is
+  impossible reports `INCONCLUSIVE` rather than `PASS`.
+- Making rollback decidable requires a monotonic counter in the package
+  (a `head_sequence`), which this version does not define. A future revision
+  that adds one MUST specify where it lives, how it advances, and what a verifier
+  with a lower recorded sequence reports — otherwise the same ambiguity returns
+  one level down.
+- **Freeze is out of scope.** Nothing here detects a publisher that keeps
+  serving the same, valid package. Bounding a freeze needs external publication
+  or an anchor (Section 8); a report MUST NOT claim freeze protection.
+
+The state record is local to the verifier and MUST NOT be written into the
+package (Section 8.4). A record that cannot be read MUST NOT be treated as "no
+prior observation": the two differ, and conflating them turns an unreadable
+file into a silent `PASS`.
+
+### 7.6 Recording the baseline
+
+A verifier that keeps freshness state has to acquire a first marker somewhere.
+The first presentation of a subject therefore establishes the baseline, and a
+second presentation of the same head is `PASS` — trust-on-first-use, with no
+claim that the first presentation was the right one. Two rules bound the damage
+that a careless baseline can do:
+
+- **Only an accepted package may set the baseline.** A verifier MUST NOT
+  record a head for a package that failed any other check. If it does, the
+  marker belongs to a package the verifier rejected, and the next legitimate
+  package is then reported as `INCONCLUSIVE` while the rejected head can later
+  come back as `PASS`, with the report claiming it was "the last accepted
+  observation". The reference verifier at 0.5.0 records a baseline for
+  packages whose overall outcome is `FAIL`; that is a defect against this
+  paragraph, not a licence to rely on it.
+- **A marker, once written, MUST NOT be replaced by a head that cannot be
+  placed.** The recorded head is durable: presenting a different head, with or
+  without a sequence number, leaves the stored baseline intact. A marker that
+  the next caller can overwrite is not a marker.
+
+Both rules are cheap to test and belong in a corpus: one fixture packages a
+rejected head and then checks that the following verdict is not `PASS`; another
+presents a second head and then re-presents the first.
+
 
 ## 8. External Anchoring
 
@@ -243,3 +307,41 @@ Nothing in this repository submits it. Doing so would require: an author
 email registered with the datatracker, `xml2rfc`-valid source, a chosen
 working group or an AD sponsor, and an IPR declaration. Until all four exist,
 this file stays a local draft, and any claim that it is "an I-D" is false.
+
+## Appendix D. Error Codes (reserved namespace)
+
+Check results are currently reported as free text in `detail`, which a machine
+cannot consume stably and which changes whenever the wording is improved. A
+stable code removes that coupling: the code is the contract, the sentence is
+courtesy.
+
+The namespace is `E-<DOMAIN>-<N>`, where `DOMAIN` is a short upper-case token
+for the area and `N` counts from 1 within it. Two domains are visible in this
+draft today:
+
+| code | domain | meaning |
+|---|---|---|
+| `E-FRESH-1` | freshness | a recorded sequence is lower than the presented one |
+| `E-FRESH-2` | freshness | head presented again, unchanged |
+| `E-FRESH-3` | freshness | the state record exists but cannot be read |
+| `E-FRESH-4` | freshness | a different head arrived with nothing to order it against |
+| `E-B64-1` | base64 | padding, alphabet or pad-bit condition violated |
+| `E-LC-1` | lifecycle | sequence gap or repeat |
+| `E-LC-2` | lifecycle | timestamp regression along the chain |
+| `E-LC-3` | lifecycle | actor is not an authorised principal |
+| `E-LC-4` | lifecycle | `previous_event` does not name the preceding event |
+
+**None of these codes is emitted by the reference verifier at version 0.5.0.**
+This appendix reserves the names so that they can be emitted without a
+second rename, and it must not be read as a description of current output:
+today `uibc-core` reports S19's fourth case as an `INCONCLUSIVE` result whose
+`detail` says the head cannot be placed. A code becomes normative for an
+implementation when that implementation emits it, and the corpus pins the
+mapping with a fixture — the same rule this document applies to every other
+claim.
+
+Codes are also the cheapest way to make the specification checkable: once each
+check names the codes it can emit, a table of `check → code` is a conformance
+artefact that a third party can implement against without reading anyone's
+source.
+

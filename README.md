@@ -6,7 +6,7 @@ The specification of **UIBC** — a portable package that binds an agent's ident
 
 ## Read the draft
 
-- [`spec/draft-zhao-uibc-evidence-chain-00.md`](spec/draft-zhao-uibc-evidence-chain-00.md) (2026-11-18, 11.5 KB)
+- [`spec/draft-zhao-uibc-evidence-chain-00.md`](spec/draft-zhao-uibc-evidence-chain-00.md) (2026-11-25, 16.7 KB)
 
 ## What this draft does and does not do
 
